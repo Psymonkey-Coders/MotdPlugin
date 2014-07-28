@@ -17,7 +17,8 @@ namespace MotdPlugin
 			public int Time { get; set; }
 			public bool Active { get; set; }
 
-			// additional properties
+			public Advert() { }			
+			
 			public Advert(string name, string text, int time, bool active)
 			{
 				Name = name;
@@ -28,8 +29,6 @@ namespace MotdPlugin
 		}
 
 		#region "Attributes"
-
-		private static int m_advertId;
 
 		private static Adverts m_instance;
 
@@ -64,7 +63,11 @@ namespace MotdPlugin
 
 		public List<Advert> AdvertList
 		{
-			get{ return m_advertsList; }
+			get 
+			{
+				List<Advert> copy = new List<Advert>(m_advertsList.ToArray());
+				return copy;
+			}
 		}
 
 		#endregion
@@ -83,7 +86,6 @@ namespace MotdPlugin
 				return;
 		
 				m_advertsList.Add(new Advert(name, text, time, active));		
-				//Console.WriteLine("User Management Plugin - Created User: {0}, with a Rank of {1}. ",userId, userRank);
 		}
 
 		public void UpdateAdvert(string name, string text, int time, bool active)
@@ -98,6 +100,9 @@ namespace MotdPlugin
 				if (advert.Name == name)
 				{
 					advert.Name = name;
+					advert.Text = text;
+					advert.Time = time;
+					advert.Active = active;
 					//Console.WriteLine("User Management Plugin - Updated {0}'s Rank to {1}. ",userId, userRank);
 				}
 			}

@@ -65,7 +65,7 @@
   <ItemGroup>
     <Compile Include="Adverts.cs" />
     <Compile Include="Core.cs" />
-    <Compile Include="FileIODefinitions.cs" />
+    <Compile Include="FileIOManager.cs" />
     <Compile Include="MotdPluginConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
