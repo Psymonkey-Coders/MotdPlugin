@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
-using System.Reflection;
 using System.IO;
-using System.Windows.Forms;
-
+using System.Xml.Serialization;
 
 using SEModAPIInternal.Support;
 
@@ -14,6 +9,7 @@ namespace MotdPlugin
 {
 	public class FileIOManager
 	{
+		#region "Config File Class"
 		[Serializable()]
 		public class MotdPluginConfig
 		{
@@ -31,7 +27,7 @@ namespace MotdPlugin
 				set { motdTitle = value; }
 			}
 
-			private string[] motdLines = new string[8];
+			private string[] motdLines = new string[10];
 			public string[] MotdLines 
 			{
 				get { return motdLines; }
@@ -54,12 +50,19 @@ namespace MotdPlugin
 
 			public MotdPluginConfig() { }
 		}
+		#endregion
+
+		#region "Attributes"
 
 		private MotdPluginConfig Config;
 
 		private XmlSerializer Serializer;
 
 		private static string m_dataFile;
+
+		#endregion
+
+		#region "Initializers and Constructors"
 
 		public FileIOManager(string datafile)
 		{
@@ -88,12 +91,9 @@ namespace MotdPlugin
 					Config.MotdLines[6] = ("You can Have up to 45 characters per line");
 					Config.MotdLines[7] = ("and 8 lines  because of the current limitation");
 
-
-					Adverts.Instance.AddAdvert("readmotd", "Use /motd to read the Message of the day!", 360, true);
-					Adverts.Instance.AddAdvert("welcome", "Welcome to the server! Its %time12% on %date%!", 360, true);
-
+					Adverts.Instance.AddAdvert("readmotd", "Use /motd to read the Message of the day!", 300, true);
+					Adverts.Instance.AddAdvert("welcome", "Welcome to the server! Its %time% on %date%!", 300, true);
 					Config.AdvertsList.AddRange(Adverts.Instance.AdvertList);
-
 
 					Console.WriteLine("Motd Plugin - FileManager - Default File Created");
 
@@ -105,8 +105,12 @@ namespace MotdPlugin
 					Config = (MotdPluginConfig)Serializer.Deserialize(readFileStream);
 					readFileStream.Close();
 					Console.WriteLine("Motd Plugin - FileManager - Loaded Data");
-				}
 
+					foreach (Adverts.Advert advert in Config.AdvertsList)
+					{
+						Adverts.Instance.AddAdvert(advert.Name, advert.Text, advert.Time, advert.Active);
+					}
+				}
 			}
 			catch (NullReferenceException nrefex)
 			{
@@ -122,13 +126,16 @@ namespace MotdPlugin
 			}
 		}
 
+		#endregion
+
+		#region "Properties"
+
 		public bool MotdActive
 		{
 			get { return Config.MotdActive; }
 			set 
 			{ 
 				Config.MotdActive = value;
-				SaveConfig();
 			}
 		}
 
@@ -138,7 +145,6 @@ namespace MotdPlugin
 			set
 			{ 
 				Config.MotdTitle = value;
-				SaveConfig();
 			}
 		}
 
@@ -148,7 +154,6 @@ namespace MotdPlugin
 			set 
 			{ 
 				Config.MotdLines = value;
-				SaveConfig();
 			}
 		}
 
@@ -158,7 +163,6 @@ namespace MotdPlugin
 			set
 			{ 
 				Config.AdvertsActive = value;
-				SaveConfig();
 			}
 		}
 		
@@ -168,14 +172,18 @@ namespace MotdPlugin
 			set 
 			{ 
 				Config.AdvertsList = value;
-				SaveConfig();
 			}
 		}
+
+		#endregion
+
+		#region "Methods"
 
 		public void SaveConfig()
 		{
 			try
 			{
+				Config.AdvertsList = Adverts.Instance.AdvertList;
 				TextWriter textWriter = new StreamWriter(m_dataFile);
 				Serializer.Serialize(textWriter, Config);
 				textWriter.Close();
@@ -192,5 +200,6 @@ namespace MotdPlugin
 			}
 		}
 
+		#endregion
 	}
 }

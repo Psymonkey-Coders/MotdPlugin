@@ -10,16 +10,18 @@ namespace MotdPlugin
 {
 	public class Adverts
 	{
+		#region "AdvertClass"
+
 		public class Advert
 		{
 			public string Name { get; set; }
 			public string Text { get; set; }
-			public int Time { get; set; }
+			public decimal Time { get; set; }
 			public bool Active { get; set; }
 
 			public Advert() { }			
 			
-			public Advert(string name, string text, int time, bool active)
+			public Advert(string name, string text, decimal time, bool active)
 			{
 				Name = name;
 				Text = text;
@@ -27,6 +29,8 @@ namespace MotdPlugin
 				Active = active;
 			}
 		}
+
+		#endregion
 
 		#region "Attributes"
 
@@ -79,37 +83,57 @@ namespace MotdPlugin
 
 		#region "Methods"
 
-
-		public void AddAdvert(string name, string text, int time, bool active)
+		public Adverts.Advert AddAdvert(string name, string text, decimal time, bool active)
 		{
-			if ( m_advertsNameList.ContainsKey(name))
-				return;
-		
-				m_advertsList.Add(new Advert(name, text, time, active));		
+			if (m_advertsNameList.ContainsKey(name))
+				return null;
+
+			Adverts.Advert advert = new Advert(name, text, time, active);
+			m_advertsList.Add(advert);
+			m_advertsNameList.Add(name, advert);
+			return advert;		
 		}
 
-		public void UpdateAdvert(string name, string text, int time, bool active)
+		public Adverts.Advert UpdateAdvert(string name, string text, decimal time, bool active)
 		{
+			Adverts.Advert returnadvert = null;
+
 			// Loop through the adverts to find the one with the specified name.
 			foreach(Advert advert in m_advertsList)
 			{
-				// If it cant find the advert with the name in the list, return to the end
+				// If it cant find the advert with the name in the list
 				if (!m_advertsNameList.ContainsKey(name))
-				return;
+					return returnadvert;
 
 				if (advert.Name == name)
 				{
-					advert.Name = name;
 					advert.Text = text;
 					advert.Time = time;
 					advert.Active = active;
-					//Console.WriteLine("User Management Plugin - Updated {0}'s Rank to {1}. ",userId, userRank);
+
+					returnadvert = advert;
 				}
 			}
-
+			return returnadvert;
 		}
-      
-		// TODO : Remove Advert Function
+
+		public void DeleteAdvertByName(string name)
+		{
+			// Loop through the adverts to find the one with the specified name.
+			List<Adverts.Advert> removelist = new List<Adverts.Advert>(m_advertsList.ToArray());
+			foreach (Advert advert in removelist)
+			{
+				// If it cant find the advert with the name in the list
+				if (!m_advertsNameList.ContainsKey(name))
+					return;
+
+				if (advert.Name == name)
+				{
+					m_advertsList.Remove(advert);
+				}
+			}
+		}
+
 		#endregion
 
 
