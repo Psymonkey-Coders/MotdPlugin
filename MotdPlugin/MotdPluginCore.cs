@@ -15,7 +15,7 @@ using SEModAPIInternal.Support;
 
 namespace MotdPlugin
 {
-    public class MotdPluginCore : PluginBase, IChatEventHandler
+    public class MotdPluginCore : PluginBase
 	{
 
 		#region "Attributes"
@@ -32,7 +32,14 @@ namespace MotdPlugin
 
 		public MotdPluginCore()
 		{
-			Console.WriteLine("Motd Plugin '" + Id.ToString() + "' Constructed!");	
+			Console.WriteLine("Motd Plugin '" + Id.ToString() + "' Constructed!");
+
+			ChatManager.ChatCommand motdCommand = new ChatManager.ChatCommand();
+			motdCommand.command = "motd";
+			motdCommand.callback = Command_Motd;
+			motdCommand.requiresAdmin = true;
+
+			ChatManager.Instance.RegisterChatCommand(motdCommand);
         }
 
         public override void Init()
@@ -61,10 +68,8 @@ namespace MotdPlugin
         #region "EventHandlers"
 
 		// Called when a client says something in chat.
-		public void OnChatReceived(ChatManager.ChatEvent client)
+		protected void Command_Motd(ChatManager.ChatEvent client)
 		{
-			Console.WriteLine("Chat recieved from: " + client.sourceUserId.ToString());
-			Console.WriteLine("Motd is " + (m_fileManager.MotdActive ? "Active" : "Not Active"));
 			ulong id = client.sourceUserId;
 
 			if (!m_fileManager.MotdActive)
@@ -72,35 +77,25 @@ namespace MotdPlugin
 
 			try
 			{
-				// If they said /motd                
-				if (client.message.Substring(0, 5).Contains(("/motd")))
-				{
-					Console.WriteLine("'{0}' used the command {1}.", id.ToString(), client.message.Substring(0, 5).Contains(("/motd")));
+				Console.WriteLine("'{0}' used the command {1}.", id.ToString(), client.message.Substring(0, 5).Contains(("/motd")));
 					
-					ChatManager.Instance.SendPrivateChatMessage(id, m_motdPluginForm.ReplaceFormatting(m_fileManager.MotdTitle));
+				ChatManager.Instance.SendPrivateChatMessage(id, m_motdPluginForm.ReplaceFormatting(m_fileManager.MotdTitle));
+
+				if (id == 0)
+					Console.WriteLine(m_motdPluginForm.ReplaceFormatting(m_fileManager.MotdTitle));
+
+				foreach (string line in m_fileManager.MotdLines)
+				{
+					ChatManager.Instance.SendPrivateChatMessage(id, m_motdPluginForm.ReplaceFormatting(line));
 
 					if (id == 0)
-						Console.WriteLine(m_motdPluginForm.ReplaceFormatting(m_fileManager.MotdTitle));
-
-					foreach (string line in m_fileManager.MotdLines)
-					{
-						ChatManager.Instance.SendPrivateChatMessage(id, m_motdPluginForm.ReplaceFormatting(line));
-
-						if (id == 0)
 							Console.WriteLine(m_motdPluginForm.ReplaceFormatting(line));
-					}
 				}
-
-				// TODO Add chat commands for everything on the form.
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine("Motd Plugin - Chat Error: " + ex.ToString());
 			}
-		}
-
-		public void OnChatSent(ChatManager.ChatEvent events)
-		{
 		}
 
         public override void Update()
